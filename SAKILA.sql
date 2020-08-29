@@ -113,6 +113,39 @@ join payment p on c.customer_id = p.customer_id
 group by c.last_name, c.first_name 
 order by c.last_name
 
+# use subqueries to display the titles of movies starting with letters k and q whose language is english
+
+# select * from language
+
+select title 
+from film 
+where (title like 'K%' 
+or title like 'Q%')
+and language_id in (select language_id from language where language_id = '1')
+
+# actors acted inn alone trip
+
+select actor.*
+from actor where actor_id in 
+(select fa.actor_id from film_actor fa where film_id in 
+ (select film_id FROM film where title = 'Alone Trip'))
+
+# names and emai address of all canadian customer
+
+select * from customer
+where address_id in 
+(select address_id from address where city_id in 
+ (select city_id from city where country_id in ( select country_id from country where lower(country) = 'canada'
+ )
+)
+)
+
+
+# all family films
+
+select title from film
+where film_id in (select film_id from film_category where category_id in (select category_id from category where name = 'Family'))
+
 
 
 
