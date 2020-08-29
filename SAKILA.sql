@@ -146,7 +146,17 @@ where address_id in
 select title from film
 where film_id in (select film_id from film_category where category_id in (select category_id from category where name = 'Family'))
 
+# frequently rented movies in descending order
 
+select f.film_id, f.title, a.*
+from film f
+join( select i.film_id, count(r.rental_id) as cnt_rented
+from rental r
+join inventory i on r.inventory_id = i.inventory_id
+group by i.film_id
+
+) a on a.film_id = f.film_id
+order by b.cnt_rented
 
 
 
