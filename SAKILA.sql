@@ -156,7 +156,87 @@ join inventory i on r.inventory_id = i.inventory_id
 group by i.film_id
 
 ) a on a.film_id = f.film_id
-order by b.cnt_rented
+order by b.cnt_rented desc
+
+# total business each store brought in 
+
+select s.store_id, a.sales
+from store s 
+join( 
+select c.store_id, sum(p.amount) as sales
+from customer c
+join payment p on c.customer_id = p.customer_id
+group by c.store_id
+) a
+on a.store_id = s.store_id
+order by s.store_id 
+
+# display store_id, city and country along with sales
+
+select A.*, B.sales 
+from (
+	select sto.store_id, cit.city, cou.country
+	from store sto
+	left join address adr
+	on sto.address_id = adr.address_id
+	join city cit
+	on adr.city_id = cit.city_id
+	join country cou
+	on cit.country_id = cou.country_id
+) A
+join (
+	select cus.store_id, sum(pay.amount) sales
+	from customer cus
+	join payment pay
+	on pay.customer_id = cus.customer_id
+	group by cus.store_id
+) B
+on A.store_id = B.store_id
+order by a.store_id
+
+# top 5 genres in gross revenue in descending order
+
+select cat.name category_name, sum( IFNULL(pay.amount, 0) ) revenue
+from category cat
+left join film_category flm_cat
+on cat.category_id = flm_cat.category_id
+left join film fil
+on flm_cat.film_id = fil.film_id
+left join inventory inv
+on fil.film_id = inv.film_id
+left join rental ren
+on inv.inventory_id = ren.inventory_id
+left join payment pay
+on ren.rental_id = pay.rental_id
+group by cat.name
+order by revenue desc
+limit 5;
+
+# creating and dropping above query as view 
+
+create view top_five_genres as 
+select cat.name category_name, sum( IFNULL(pay.amount, 0) ) revenue
+from category cat
+left join film_category flm_cat
+on cat.category_id = flm_cat.category_id
+left join film fil
+on flm_cat.film_id = fil.film_id
+left join inventory inv
+on fil.film_id = inv.film_id
+left join rental ren
+on inv.inventory_id = ren.inventory_id
+left join payment pay
+on ren.rental_id = pay.rental_id
+group by cat.name
+order by revenue desc
+limit 5;
+
+select * from top_five_genres;
+
+drop view top_five_genres;
+
+
+
 
 
 
